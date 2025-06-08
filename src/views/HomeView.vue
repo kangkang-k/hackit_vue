@@ -19,7 +19,8 @@
         <el-table-column label="Category">
           <template #header>
             <span>Category</span>
-            <el-button v-if="selectedCategory" type="warning" size="mini" @click="resetCategoryFilter">取消筛选</el-button>
+            <el-button v-if="selectedCategory" type="warning" size="mini" @click="resetCategoryFilter">取消筛选
+            </el-button>
           </template>
           <template #default="scope">
             <el-link type="primary" @click="fetchRewardsByCategory(scope.row.category_name)">
@@ -30,12 +31,21 @@
         <el-table-column label="Creator">
           <template #header>
             <span>Creator</span>
-            <el-button v-if="selectedCreator" type="warning" size="mini" @click="resetCreatorFilter">取消筛选</el-button>
+            <el-button v-if="selectedCreator" type="warning" size="mini" @click="resetCreatorFilter">取消筛选
+            </el-button>
           </template>
           <template #default="scope">
-            <el-link type="primary" @click="fetchRewardsByCreator(scope.row.creator_username)">
+            <el-dropdown @command="(command) => handleCreatorCommand(scope.row.creator_username, command)">
+          <span class="el-dropdown-link">
+            <el-link type="primary">
               {{ scope.row.creator_username }}
             </el-link>
+          </span>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="profile">用户主页</el-dropdown-item>
+                <el-dropdown-item command="filter">筛选</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </template>
         </el-table-column>
         <el-table-column prop="reward_amount" label="Reward Amount"></el-table-column>
@@ -90,6 +100,24 @@ export default {
       this.selectedCreator = creatorUsername;
       this.applyFilters();
     },
+    goToUserProfile(creatorUsername) {
+      this.$router.push({name: 'Profile', params: {username: creatorUsername}});
+    },
+    handleCreatorCommand(creatorUsername, command) {
+      if (command === 'profile') {
+        if (localStorage.getItem('authToken')) {
+          this.goToUserProfile(creatorUsername);
+        } else {
+          this.$message({
+            message: '请登录查看',
+            type: 'warning'
+          });
+        }
+
+      } else if (command === 'filter') {
+        this.fetchRewardsByCreator(creatorUsername);
+      }
+    },
     applyFilters() {
       const params = {};
       if (this.selectedCategory) {
@@ -98,13 +126,13 @@ export default {
       if (this.selectedCreator) {
         params.creator_username = this.selectedCreator;
       }
-      axios.get('http://127.0.0.1:8000/rewardapp/public-rewards/', { params })
-        .then(response => {
-          this.rewards = response.data;
-        })
-        .catch(error => {
-          console.error('筛选错误:', error);
-        });
+      axios.get('http://127.0.0.1:8000/rewardapp/public-rewards/', {params})
+          .then(response => {
+            this.rewards = response.data;
+          })
+          .catch(error => {
+            console.error('筛选错误:', error);
+          });
     },
     resetCategoryFilter() {
       this.selectedCategory = null;
@@ -137,7 +165,7 @@ export default {
       })
           .then(response => {
             this.$message.success('接单成功');
-            this.fetchRewards(); // Refresh the rewards list
+            this.fetchRewards();
           })
           .catch(error => {
             if (error.response && error.response.data) {

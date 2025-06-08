@@ -1,16 +1,18 @@
 <!-- src/views/LoginView.vue -->
 <template>
   <div id="login">
-    <h1>Login</h1>
+    <h1 style="text-align: center">登录</h1>
     <el-form :model="loginForm" ref="loginForm" :rules="rules" label-width="80px">
-      <el-form-item label="Username" prop="username">
+      <el-form-item label="用户名" prop="username">
         <el-input v-model="loginForm.username" autocomplete="off"></el-input>
       </el-form-item>
-      <el-form-item label="Password" prop="password">
+      <el-form-item label="密码" prop="password">
         <el-input type="password" v-model="loginForm.password" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="handleLogin">Login</el-button>
+        <div class="button-container">
+          <el-button type="primary" @click="handleLogin">Login</el-button>
+        </div>
       </el-form-item>
     </el-form>
   </div>
@@ -71,6 +73,12 @@ export default {
 #login {
   max-width: 500px;
   margin: 50px auto;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中（如果需要） */
 }
 
 h1 {
