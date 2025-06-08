@@ -50,7 +50,7 @@ export default {
                 // 存储 token 和用户名
                 localStorage.setItem('authToken', token);
                 localStorage.setItem('username', this.loginForm.username);
-                this.$router.push({name: 'home'});
+                this.$router.push({name: 'Home'});
               })
               .catch(error => {
                 if (error.response && error.response.data.non_field_errors) {
@@ -77,8 +77,8 @@ export default {
 
 .button-container {
   display: flex;
-  justify-content: center; /* 水平居中 */
-  align-items: center; /* 垂直居中（如果需要） */
+  justify-content: center;
+  align-items: center;
 }
 
 h1 {

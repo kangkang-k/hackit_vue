@@ -2,7 +2,16 @@
   <div>
     <div>
       <el-card>
-        <h2>用户详情</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2>用户详情</h2>
+          <el-button
+              v-if="userData.is_auth_user"
+              type="primary"
+              @click="goToPublishReward"
+          >
+            发布悬赏
+          </el-button>
+        </div>
         <el-skeleton :loading="!userData" animated>
           <template #default>
             <el-row>
@@ -41,41 +50,40 @@
     </div>
     <div>
       <el-tabs v-model="activeName" @tab-click="handleTabsClick">
-        <el-tab-pane label="已发布悬赏" name="pub_reward">
-          <div v-if="activeName === 'pub_reward'">
-            <el-table
-                :data="rewards"
-                stripe
-                style="width: 100%">
-              <el-table-column
-                  prop="title"
-                  label="标题">
-              </el-table-column>
-              <el-table-column
-                  prop="description"
-                  label="描述">
-              </el-table-column>
-              <el-table-column
-                  prop="category_name"
-                  label="类别">
-              </el-table-column>
-              <el-table-column
-                  prop="reward_amount"
-                  label="悬赏金额">
-              </el-table-column>
-              <el-table-column
-                  prop="created_at"
-                  label="创建时间">
-              </el-table-column>
-              <el-table-column
-                  prop="status"
-                  label="状态">
-              </el-table-column>
-            </el-table>
+        <el-tab-pane label="已发布" name="waiting">
+          <div>
+            <reward-table :rewards="rewards"></reward-table>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="已完成悬赏" name="fin_reward">
-
+        <el-tab-pane label="被申请" name="applied">
+          <div>
+            <reward-table :rewards="rewards"></reward-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="已结款" name="payed">
+          <div>
+            <reward-table :rewards="rewards"></reward-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="申请中" name="apl_reward">
+          <div>
+            <reward-table :rewards="rewards"></reward-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="开发中" name="in_progress">
+          <div>
+            <reward-table :rewards="rewards"></reward-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="已完成" name="completed">
+          <div>
+            <reward-table :rewards="rewards"></reward-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="被打回" name="callback">
+          <div>
+            <reward-table :rewards="rewards"></reward-table>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -84,24 +92,28 @@
 
 <script>
 import axios from 'axios';
+import RewardTable from "../components/RewardTableView.vue"
 
 export default {
+  components: {
+    RewardTable
+  },
   data() {
     return {
-      activeName: 'pub_reward',
+      activeName: 'waiting',
       userData: null,
       rewards: [],
     };
-
   },
   created() {
     this.fetchUserData();
   },
   methods: {
     handleTabsClick(tab, event) {
-      if (tab.name === 'pub_reward') {
-        this.fetchPublishedRewards();
-      }
+      this.fetchPublishedRewards(tab.name);
+    },
+    goToPublishReward() {
+      this.$router.push({name: 'Publish'});
     },
     fetchUserData() {
       const username = this.$route.params.username;
@@ -113,14 +125,14 @@ export default {
       })
           .then(response => {
             this.userData = response.data;
-            this.fetchPublishedRewards();
+            this.fetchPublishedRewards("waiting");
           })
           .catch(error => {
             console.error('获取用户数据失败:', error);
             this.$message.error('获取用户数据失败');
           });
     },
-    fetchPublishedRewards() {
+    fetchPublishedRewards(status) {
       if (!this.userData) return;
       const username = this.userData.username;
       const authToken = localStorage.getItem('authToken');
@@ -128,7 +140,7 @@ export default {
         headers: {
           'Authorization': `Token ${authToken}`,
         },
-        params: {"is_filter": 1},
+        params: {"status": status},
       })
           .then(response => {
             this.rewards = response.data;
@@ -160,5 +172,9 @@ export default {
 
 .reward-card {
   margin-bottom: 20px;
+}
+
+.field-separator {
+  margin: 0 5px;
 }
 </style>

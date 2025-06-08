@@ -3,7 +3,11 @@
     <el-header>
       <el-row type="flex" justify="end">
         <template v-if="isLoggedIn">
-          <span>当前用户：{{ currentUser }}</span>
+
+          <span> 当前用户：<el-link type="primary" @click="goToUserProfile(currentUser)">{{
+              currentUser
+            }}</el-link></span>
+
           <el-button type="danger" @click="logout">登出</el-button>
         </template>
         <template v-else>
@@ -52,7 +56,19 @@
         <el-table-column prop="created_at" label="Created At"></el-table-column>
         <el-table-column label="Actions">
           <template #default="scope">
-            <el-button type="primary" @click="acceptReward(scope.row)">接单</el-button>
+            <el-button type="primary" @click="showDialog = true">接单</el-button>
+            <el-dialog
+                title="确认"
+                :visible.sync="showDialog"
+                width="30%"
+                @close="handleClose"
+            >
+              <span>确认接单？</span>
+              <span slot="footer" class="dialog-footer">
+        <el-button @click="showDialog = false">否</el-button>
+        <el-button type="primary" @click="confirmAccept(scope.row)">是</el-button>
+      </span>
+            </el-dialog>
           </template>
         </el-table-column>
       </el-table>
@@ -63,9 +79,11 @@
 <script>
 import axios from 'axios';
 
+
 export default {
   data() {
     return {
+      showDialog: false,
       rewards: [],
       currentUser: localStorage.getItem('username') || '',
       selectedCategory: null,
@@ -81,8 +99,12 @@ export default {
     this.fetchRewards();
   },
   methods: {
+    confirmAccept(reward) {
+      this.showDialog = false;
+      this.acceptReward(reward);
+    },
     fetchRewards() {
-      axios.get('http://127.0.0.1:8000/rewardapp/public-rewards/')
+      axios.get('http://127.0.0.1:8000/rewardapp/public-rewards/?status=waiting')
           .then(response => {
             this.rewards = response.data;
             this.selectedCategory = null;
@@ -109,8 +131,8 @@ export default {
           this.goToUserProfile(creatorUsername);
         } else {
           this.$message({
-            message: '请登录查看',
-            type: 'warning'
+            message: '请先登录再查看',
+            type: 'error'
           });
         }
 
@@ -152,7 +174,7 @@ export default {
       const authToken = localStorage.getItem('authToken');
 
       if (!authToken) {
-        this.$message.error('Please log in to accept rewards.');
+        this.$message.error('请先登录再接单');
         return;
       }
 

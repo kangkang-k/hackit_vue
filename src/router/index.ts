@@ -4,13 +4,14 @@ import HomeView from '../views/HomeView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import LoginView from "@/views/LoginView.vue";
 import UserProfile from "@/views/UserProfile.vue";
+import PublishRewardView from "@/views/PublishRewardView.vue";
 
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
     {
         path: '/',
-        name: 'home',
+        name: 'Home',
         component: HomeView
     },
     {
@@ -27,6 +28,11 @@ const routes: Array<RouteConfig> = [
         path: '/profile/:username',
         name: 'Profile',
         component: UserProfile,
+    },
+    {
+        path: '/publish',
+        name: 'Publish',
+        component: PublishRewardView,
     },
 ]
 
