@@ -40,14 +40,6 @@
         <el-button type="warning" @click="emitReject(scope.row.id)">拒绝</el-button>
       </template>
     </el-table-column>
-    <!-- 撤销按钮 -->
-    <el-table-column
-        v-if="showRevokeButton"
-        label="操作">
-      <template slot-scope="scope">
-        <el-button type="danger" @click="emitRevoke(scope.row.id)">撤销</el-button>
-      </template>
-    </el-table-column>
   </el-table>
 </template>
 
