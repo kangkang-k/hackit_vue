@@ -44,7 +44,7 @@ export default {
     handleLogin() {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
-          axios.post('http://127.0.0.1:8000/userapp/login/', this.loginForm)
+          axios.post('http://123.249.90.144:8000/userapp/login/', this.loginForm)
               .then(response => {
                 const token = response.data.token;
                 // 存储 token 和用户名

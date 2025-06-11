@@ -39,7 +39,7 @@ const categories = ref<{ id: number, name: string }[]>([]);
 
 onMounted(async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/rewardapp/categories/', {
+    const response = await axios.get('http://123.249.90.144:8000/rewardapp/categories/', {
       headers: {
         'Authorization': `Token ${localStorage.getItem('authToken')}`,
       }
@@ -60,7 +60,7 @@ const submitForm = async () => {
       return;
     }
 
-    await axios.post('http://127.0.0.1:8000/rewardapp/rewards/', {
+    await axios.post('http://123.249.90.144:8000/rewardapp/rewards/', {
       title: title.value,
       description: description.value,
       category: selectedCategoryId.value,
