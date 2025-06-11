@@ -52,12 +52,21 @@
       <el-tabs v-model="activeName" @tab-click="handleTabsClick">
         <el-tab-pane label="已发布" name="waiting">
           <div>
-            <reward-table :rewards="rewards"></reward-table>
+            <reward-table
+                :rewards="rewards"
+                :showRemoveButton="activeName === 'waiting'"
+                @remove-reward="handleRemoveReward">
+            </reward-table>
           </div>
         </el-tab-pane>
         <el-tab-pane label="被申请" name="applied">
           <div>
-            <reward-table :rewards="rewards"></reward-table>
+            <reward-table
+                :rewards="rewards"
+                :showApprovalButtons="activeName === 'applied'"
+                @approve-reward="handleApproveReward"
+                @reject-reward="handleRejectReward">
+            </reward-table>
           </div>
         </el-tab-pane>
         <el-tab-pane label="已结款" name="payed">
@@ -67,7 +76,11 @@
         </el-tab-pane>
         <el-tab-pane label="申请中" name="apl_reward">
           <div>
-            <reward-table :rewards="rewards"></reward-table>
+            <reward-table
+                :rewards="rewards"
+                :showRevokeButton="activeName === 'apl_reward'"
+                @revoke-reward="handleRevokeReward">
+            </reward-table>
           </div>
         </el-tab-pane>
         <el-tab-pane label="开发中" name="in_progress">
@@ -109,9 +122,7 @@ export default {
     this.fetchUserData();
   },
   methods: {
-    handleTabsClick(tab, event) {
-      this.fetchPublishedRewards(tab.name);
-    },
+
     goToPublishReward() {
       this.$router.push({name: 'Publish'});
     },
@@ -132,6 +143,9 @@ export default {
             this.$message.error('获取用户数据失败');
           });
     },
+    handleTabsClick(tab, event) {
+      this.fetchPublishedRewards(tab.name);
+    },
     fetchPublishedRewards(status) {
       if (!this.userData) return;
       const username = this.userData.username;
@@ -150,6 +164,22 @@ export default {
             this.$message.error('获取悬赏数据失败');
           });
     },
+    handleRemoveReward(rewardId) {
+      alert(`下架 reward ID: ${rewardId}`);
+      // TODO: 实现下架请求逻辑
+    },
+    handleApproveReward(rewardId) {
+      alert(`同意 reward ID: ${rewardId}`);
+      // TODO: 实现同意请求逻辑
+    },
+    handleRejectReward(rewardId) {
+      alert(`拒绝 reward ID: ${rewardId}`);
+      // TODO: 实现拒绝请求逻辑
+    },
+    handleRevokeReward(rewardId) {
+      alert(`撤销 reward ID: ${rewardId}`);
+      // TODO: 实现撤销申请逻辑
+    }
   },
 };
 </script>

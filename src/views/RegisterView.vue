@@ -55,7 +55,7 @@ export default {
               localStorage.setItem('username', this.form.username);
             }
             this.$router.push({name: 'home'});
-
+            window.location.reload();
           } catch (registerError) {
             if (registerError.response && registerError.response.data.username) {
               Message.error(registerError.response.data.username[0]);

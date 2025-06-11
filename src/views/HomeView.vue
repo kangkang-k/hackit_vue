@@ -88,6 +88,7 @@ export default {
       currentUser: localStorage.getItem('username') || '',
       selectedCategory: null,
       selectedCreator: null,
+      status: "waiting"
     };
   },
   computed: {
@@ -141,7 +142,9 @@ export default {
       }
     },
     applyFilters() {
-      const params = {};
+      const params = {
+        status: this.status,
+      };
       if (this.selectedCategory) {
         params.category_name = this.selectedCategory;
       }
