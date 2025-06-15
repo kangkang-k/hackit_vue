@@ -44,9 +44,9 @@ export default {
       this.$refs.form.validate(async (valid) => {
         if (valid) {
           try {
-            await axios.post('http://123.249.90.144:8000/userapp/register/', this.form);
+            await axios.post(`http://${this.$backends_base_url}/userapp/register/`, this.form);
             if (confirm('注册成功！是否直接登录？')) {
-              const loginResponse = await axios.post('http://123.249.90.144:8000/userapp/login/', {
+              const loginResponse = await axios.post(`http://${this.$backends_base_url}/userapp/login/`, {
                 username: this.form.username,
                 password: this.form.password,
               });

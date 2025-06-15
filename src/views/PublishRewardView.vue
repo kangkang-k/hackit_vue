@@ -9,10 +9,10 @@
     <el-form-item label="Category" required>
       <el-select v-model="selectedCategoryId" placeholder="Select category">
         <el-option
-            v-for="cat in categories"
-            :key="cat.id"
-            :label="cat.name"
-            :value="cat.id"
+          v-for="cat in categories"
+          :key="cat.id"
+          :label="cat.name"
+          :value="cat.id"
         >
         </el-option>
       </el-select>
@@ -26,56 +26,63 @@
   </el-form>
 </template>
 
-<script setup lang="ts">
-import {ref, onMounted} from 'vue';
+<script>
 import axios from 'axios';
-import {Message} from 'element-ui';
+import { Message } from 'element-ui';
 
-const title = ref('');
-const description = ref('');
-const selectedCategoryId = ref<number | null>(null);
-const rewardAmount = ref<number | null>(null);
-const categories = ref<{ id: number, name: string }[]>([]);
-
-onMounted(async () => {
-  try {
-    const response = await axios.get('http://123.249.90.144:8000/rewardapp/categories/', {
-      headers: {
-        'Authorization': `Token ${localStorage.getItem('authToken')}`,
+export default {
+  data() {
+    return {
+      title: '',
+      description: '',
+      selectedCategoryId: null,
+      rewardAmount: null,
+      categories: [],
+    };
+  },
+  mounted() {
+    this.fetchCategories();
+  },
+  methods: {
+    async fetchCategories() {
+      try {
+        const response = await axios.get(`http://${this.$backends_base_url}/rewardapp/categories/`, {
+          headers: {
+            'Authorization': `Token ${localStorage.getItem('authToken')}`,
+          }
+        });
+        this.categories = response.data;
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+        Message.error('Failed to fetch categories');
       }
-    });
-    categories.value = response.data;
-  } catch (error) {
-    console.error('Failed to fetch categories:', error);
-    Message.error('Failed to fetch categories');
-  }
-});
+    },
+    async submitForm() {
+      try {
+        const authToken = localStorage.getItem('authToken');
+        if (!authToken) {
+          Message.error('You must be logged in to submit a reward');
+          return;
+        }
 
-// Handle form submission
-const submitForm = async () => {
-  try {
-    const authToken = localStorage.getItem('authToken');
-    if (!authToken) {
-      Message.error('You must be logged in to submit a reward');
-      return;
-    }
+        await axios.post(`http://${this.$backends_base_url}/rewardapp/rewards/`, {
+          title: this.title,
+          description: this.description,
+          category: this.selectedCategoryId,
+          reward_amount: this.rewardAmount,
+        }, {
+          headers: {
+            'Authorization': `Token ${authToken}`,
+          }
+        });
 
-    await axios.post('http://123.249.90.144:8000/rewardapp/rewards/', {
-      title: title.value,
-      description: description.value,
-      category: selectedCategoryId.value,
-      reward_amount: rewardAmount.value,
-    }, {
-      headers: {
-        'Authorization': `Token ${authToken}`,
+        Message.success('Reward published successfully');
+      } catch (error) {
+        console.error('Failed to publish reward:', error);
+        Message.error('Failed to publish reward');
       }
-    });
-
-    Message.success('Reward published successfully');
-  } catch (error) {
-    console.error('Failed to publish reward:', error);
-    Message.error('Failed to publish reward');
-  }
+    },
+  },
 };
 </script>
 

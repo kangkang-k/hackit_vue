@@ -93,7 +93,7 @@
             <reward-table :rewards="rewards"></reward-table>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="被打回" name="callback">
+        <el-tab-pane label="已打回" name="callback">
           <div>
             <reward-table :rewards="rewards"></reward-table>
           </div>
@@ -102,7 +102,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import axios from 'axios';
 import RewardTable from "../components/RewardTableView.vue"
@@ -129,7 +128,7 @@ export default {
     fetchUserData() {
       const username = this.$route.params.username;
       const authToken = localStorage.getItem('authToken');
-      axios.get(`http://123.249.90.144:8000/userapp/detail/${username}/`, {
+      axios.get(`http://${this.$backends_base_url}/userapp/detail/${username}/`, {
         headers: {
           'Authorization': `Token ${authToken}`,
         }
@@ -150,7 +149,7 @@ export default {
       if (!this.userData) return;
       const username = this.userData.username;
       const authToken = localStorage.getItem('authToken');
-      axios.get(`http://123.249.90.144:8000/rewardapp/public-rewards/?creator_username=${username}`, {
+      axios.get(`http://${this.$backends_base_url}/rewardapp/public-rewards/?creator_username=${username}`, {
         headers: {
           'Authorization': `Token ${authToken}`,
         },

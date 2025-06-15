@@ -105,7 +105,7 @@ export default {
       this.acceptReward(reward);
     },
     fetchRewards() {
-      axios.get('http://123.249.90.144:8000/rewardapp/public-rewards/?status=waiting')
+      axios.get(`http://${this.$backends_base_url}/rewardapp/public-rewards/?status=waiting`)
           .then(response => {
             this.rewards = response.data;
             this.selectedCategory = null;
@@ -151,7 +151,7 @@ export default {
       if (this.selectedCreator) {
         params.creator_username = this.selectedCreator;
       }
-      axios.get('http://123.249.90.144:8000/rewardapp/public-rewards/', {params})
+      axios.get(`http://${this.$backends_base_url}/rewardapp/public-rewards/`, {params})
           .then(response => {
             this.rewards = response.data;
           })
@@ -181,7 +181,7 @@ export default {
         return;
       }
 
-      axios.post('http://123.249.90.144:8000/rewardapp/applications/', {
+      axios.post(`http://${this.$backends_base_url}/rewardapp/applications/`, {
         reward: reward.id
       }, {
         headers: {
