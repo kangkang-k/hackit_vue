@@ -69,20 +69,6 @@
             </reward-table>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="已结款" name="payed">
-          <div>
-            <reward-table :rewards="rewards"></reward-table>
-          </div>
-        </el-tab-pane>
-        <el-tab-pane label="申请中" name="apl_reward">
-          <div>
-            <reward-table
-                :rewards="rewards"
-                :showRevokeButton="activeName === 'apl_reward'"
-                @revoke-reward="handleRevokeReward">
-            </reward-table>
-          </div>
-        </el-tab-pane>
         <el-tab-pane label="开发中" name="in_progress">
           <div>
             <reward-table :rewards="rewards"></reward-table>
@@ -96,6 +82,20 @@
         <el-tab-pane label="已打回" name="callback">
           <div>
             <reward-table :rewards="rewards"></reward-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="已结款" name="payed">
+          <div>
+            <reward-table :rewards="rewards"></reward-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="已下架" name="take_down">
+          <div>
+            <reward-table
+                :rewards="rewards"
+                :showRepostButton="activeName === 'take_down'"
+                @repost-reward="handleRepostReward">
+            </reward-table>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -164,20 +164,76 @@ export default {
           });
     },
     handleRemoveReward(rewardId) {
-      alert(`下架 reward ID: ${rewardId}`);
-      // TODO: 实现下架请求逻辑
+      this.$confirm('是否下架此悬赏？', '确认', {
+        confirmButtonText: '是',
+        cancelButtonText: '否',
+        type: 'warning'
+      }).then(() => {
+        const authToken = localStorage.getItem('authToken');
+        axios.patch(`http://${this.$backends_base_url}/rewardapp/rewards/${rewardId}/`, {
+          "status": 'take_down'
+        }, {
+          headers: {
+            'Authorization': `Token ${authToken}`
+          }
+        })
+            .then(response => {
+              this.$message({
+                type: 'success',
+                message: '悬赏已下架'
+              });
+              this.fetchPublishedRewards(this.activeName);
+            })
+            .catch(error => {
+              console.error('下架悬赏失败:', error);
+              this.$message.error('下架悬赏失败');
+            });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消下架'
+        });
+      });
     },
     handleApproveReward(rewardId) {
       alert(`同意 reward ID: ${rewardId}`);
       // TODO: 实现同意请求逻辑
     },
+    handleRepostReward(rewardId) {
+      this.$confirm('是否重新上架此悬赏？', '确认', {
+        confirmButtonText: '是',
+        cancelButtonText: '否',
+        type: 'warning'
+      }).then(() => {
+        const authToken = localStorage.getItem('authToken');
+        axios.patch(`http://${this.$backends_base_url}/rewardapp/rewards/${rewardId}/`, {
+          "status": 'waiting'
+        }, {
+          headers: {
+            'Authorization': `Token ${authToken}`
+          }
+        })
+            .then(response => {
+              this.$message({
+                type: 'success',
+                message: '悬赏已重新上架'
+              });
+              this.fetchPublishedRewards(this.activeName);
+            })
+            .catch(error => {
+              console.error('重新上架悬赏失败:', error);
+              this.$message.error('重新上架悬赏失败');
+            });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消重新上架'
+        });
+      });
+    },
     handleRejectReward(rewardId) {
       alert(`拒绝 reward ID: ${rewardId}`);
       // TODO: 实现拒绝请求逻辑
-    },
-    handleRevokeReward(rewardId) {
-      alert(`撤销 reward ID: ${rewardId}`);
-      // TODO: 实现撤销申请逻辑
     }
   },
 };

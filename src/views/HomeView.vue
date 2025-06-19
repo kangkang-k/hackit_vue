@@ -3,11 +3,7 @@
     <el-header>
       <el-row type="flex" justify="end">
         <template v-if="isLoggedIn">
-
-          <span> 当前用户：<el-link type="primary" @click="goToUserProfile(currentUser)">{{
-              currentUser
-            }}</el-link></span>
-
+          <span> 当前用户：<el-link type="primary" @click="goToUserProfile(currentUser)">{{ currentUser }}</el-link></span>
           <el-button type="danger" @click="logout">登出</el-button>
         </template>
         <template v-else>
@@ -23,8 +19,7 @@
         <el-table-column label="Category">
           <template #header>
             <span>Category</span>
-            <el-button v-if="selectedCategory" type="warning" size="mini" @click="resetCategoryFilter">取消筛选
-            </el-button>
+            <el-button v-if="selectedCategory" type="warning" size="mini" @click="resetCategoryFilter">取消筛选</el-button>
           </template>
           <template #default="scope">
             <el-link type="primary" @click="fetchRewardsByCategory(scope.row.category_name)">
@@ -35,16 +30,15 @@
         <el-table-column label="Creator">
           <template #header>
             <span>Creator</span>
-            <el-button v-if="selectedCreator" type="warning" size="mini" @click="resetCreatorFilter">取消筛选
-            </el-button>
+            <el-button v-if="selectedCreator" type="warning" size="mini" @click="resetCreatorFilter">取消筛选</el-button>
           </template>
           <template #default="scope">
             <el-dropdown @command="(command) => handleCreatorCommand(scope.row.creator_username, command)">
-          <span class="el-dropdown-link">
-            <el-link type="primary">
-              {{ scope.row.creator_username }}
-            </el-link>
-          </span>
+              <span class="el-dropdown-link">
+                <el-link type="primary">
+                  {{ scope.row.creator_username }}
+                </el-link>
+              </span>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item command="profile">用户主页</el-dropdown-item>
                 <el-dropdown-item command="filter">筛选</el-dropdown-item>
@@ -54,20 +48,21 @@
         </el-table-column>
         <el-table-column prop="reward_amount" label="Reward Amount"></el-table-column>
         <el-table-column prop="created_at" label="Created At"></el-table-column>
+        <el-table-column prop="id" label="id"></el-table-column>
         <el-table-column label="Actions">
           <template #default="scope">
-            <el-button type="primary" @click="showDialog = true">接单</el-button>
+            <el-button type="primary" @click="handleAcceptClick(scope.$index)">接单</el-button>
             <el-dialog
                 title="确认"
-                :visible.sync="showDialog"
+                :visible.sync="showDialog[scope.$index]"
                 width="30%"
                 @close="handleClose"
             >
               <span>确认接单？</span>
               <span slot="footer" class="dialog-footer">
-        <el-button @click="showDialog = false">否</el-button>
-        <el-button type="primary" @click="confirmAccept(scope.row)">是</el-button>
-      </span>
+                <el-button @click="showDialog[scope.$index] = false">否</el-button>
+                <el-button type="primary" @click="confirmAccept(scope.row)">是</el-button>
+              </span>
             </el-dialog>
           </template>
         </el-table-column>
@@ -79,11 +74,10 @@
 <script>
 import axios from 'axios';
 
-
 export default {
   data() {
     return {
-      showDialog: false,
+      showDialog: [],
       rewards: [],
       currentUser: localStorage.getItem('username') || '',
       selectedCategory: null,
@@ -100,20 +94,25 @@ export default {
     this.fetchRewards();
   },
   methods: {
+    handleAcceptClick(index) {
+      console.log('Button clicked for index:', index);
+      this.$set(this.showDialog, index, true);
+    },
     confirmAccept(reward) {
-      this.showDialog = false;
+      this.showDialog = this.showDialog.map(() => false); // 关闭所有对话框
       this.acceptReward(reward);
     },
     fetchRewards() {
       axios.get(`http://${this.$backends_base_url}/rewardapp/public-rewards/?status=waiting`)
-          .then(response => {
-            this.rewards = response.data;
-            this.selectedCategory = null;
-            this.selectedCreator = null;
-          })
-          .catch(error => {
-            console.error('请求错误，请联系管理员,3360976193@qq.com:', error);
-          });
+        .then(response => {
+          this.rewards = response.data;
+          this.showDialog = new Array(this.rewards.length).fill(false); // 初始化对话框状态
+          this.selectedCategory = null;
+          this.selectedCreator = null;
+        })
+        .catch(error => {
+          console.error('请求错误，请联系管理员,3360976193@qq.com:', error);
+        });
     },
     fetchRewardsByCategory(categoryName) {
       this.selectedCategory = categoryName;
@@ -136,7 +135,6 @@ export default {
             type: 'error'
           });
         }
-
       } else if (command === 'filter') {
         this.fetchRewardsByCreator(creatorUsername);
       }
@@ -152,12 +150,12 @@ export default {
         params.creator_username = this.selectedCreator;
       }
       axios.get(`http://${this.$backends_base_url}/rewardapp/public-rewards/`, {params})
-          .then(response => {
-            this.rewards = response.data;
-          })
-          .catch(error => {
-            console.error('筛选错误:', error);
-          });
+        .then(response => {
+          this.rewards = response.data;
+        })
+        .catch(error => {
+          console.error('筛选错误:', error);
+        });
     },
     resetCategoryFilter() {
       this.selectedCategory = null;
@@ -188,18 +186,18 @@ export default {
           'Authorization': `Token ${authToken}`
         }
       })
-          .then(response => {
-            this.$message.success('接单成功');
-            this.fetchRewards();
-          })
-          .catch(error => {
-            if (error.response && error.response.data) {
-              this.$message.error('不可接收自己发布的订单');
-            } else {
-              console.error('Error accepting reward:', error);
-              this.$message.error('An error occurred while accepting the reward.');
-            }
-          });
+        .then(response => {
+          this.$message.success('接单成功');
+          this.fetchRewards();
+        })
+        .catch(error => {
+          if (error.response && error.response.data) {
+            this.$message.error('不可接收自己发布的订单');
+          } else {
+            console.error('Error accepting reward:', error);
+            this.$message.error('An error occurred while accepting the reward.');
+          }
+        });
     },
     logout() {
       localStorage.removeItem('authToken');
